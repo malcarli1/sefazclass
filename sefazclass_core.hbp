@@ -1,0 +1,23 @@
+#
+# sefazclass_core.hbp
+# Core fiscal sem modulos PDF/DANFE.
+#
+
+-stop{!allwin}
+
+-m -n -w3 -es2
+-hblib
+
+-iinclude
+-lhbwin
+-lhbct
+-LC:\Borland\bcc58\Lib\PSDK
+-lcrypt32
+-lcryptui
+-ladvapi32
+-lwinhttp
+
+-olib/sefazclass_core
+-hbx=lib/sefazclass_core.hbx
+
+@sefazclass_core_sources.hbm

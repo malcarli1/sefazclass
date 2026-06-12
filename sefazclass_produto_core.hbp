@@ -1,0 +1,24 @@
+#
+# SefazClass Produto - core modular.
+# Mantem a SefazClass original por baixo e adiciona API organizada.
+#
+
+-stop{!allwin}
+
+-m -n -w3 -es2
+-hblib
+
+-iinclude
+-lhbwin
+-lhbct
+-LC:\Borland\bcc58\Lib\PSDK
+-lcrypt32
+-lcryptui
+-ladvapi32
+-lwinhttp
+
+-olib/sefazclass_produto_core
+-hbx=lib/sefazclass_produto_core.hbx
+
+@sefazclass_produto_sources.hbm
+

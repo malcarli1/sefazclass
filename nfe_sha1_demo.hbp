@@ -1,0 +1,8 @@
+-lhbwin
+-LC:\Borland\bcc58\Lib\PSDK
+-lcrypt32
+-ladvapi32
+-odemo_nfe_sha1
+
+demo_nfe_sha1.prg
+xml_crypto_sha1.prg

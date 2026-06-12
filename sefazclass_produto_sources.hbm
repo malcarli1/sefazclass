@@ -1,0 +1,6 @@
+@sefazclass_core_sources.hbm
+produto/sefaz_produto.prg
+produto/sefaz_produto_resposta.prg
+produto/sefaz_produto_certificado.prg
+produto/sefaz_produto_documento.prg
+produto/sefaz_produto_danfe.prg

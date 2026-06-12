@@ -1,0 +1,10 @@
+#
+# Link da SefazClass Produto core.
+#
+
+incpaths=include
+libs=sefazclass_produto_core sefazclass_core hbwin hbct
+libpaths=lib
+libpaths=C:\Borland\bcc58\Lib\PSDK
+libs=crypt32 cryptui advapi32 winhttp
+

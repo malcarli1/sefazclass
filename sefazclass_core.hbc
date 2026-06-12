@@ -1,0 +1,10 @@
+#
+# sefazclass_core.hbc
+# Use este quando quiser SEFAZ sem os modulos PDF/DANFE.
+#
+
+incpaths=include
+libs=sefazclass_core hbwin hbct
+libpaths=lib
+libpaths=C:\Borland\bcc58\Lib\PSDK
+libs=crypt32 cryptui advapi32 winhttp
