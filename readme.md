@@ -1,6 +1,6 @@
 # Sefazclass
 
-Classe com funções pra Sefaz
+Classe com funÃ§Ãµes pra Sefaz
 
 Crie e/ou altere \harbour\bin\hbmk.hbc
 
@@ -13,38 +13,38 @@ libpaths=pasta do arquivo sefazclass.hbc
 
 Entregar XML e receber uma resposta.
 
-No geral, a autorização de documentos envolve duas etapas:
+No geral, a autorizaÃ§Ã£o de documentos envolve duas etapas:
 
-1. Entrega o XML que retorna um número de recibo (ou erro)
+1. Entrega o XML que retorna um nÃºmero de recibo (ou erro)
 2. Consulta esse recibo que retorna o protocolo (ou erro)
 
-Já outras etapas: cancelamento, carta de correção, inutilização, etc. envolve apenas uma etapa:
+JÃ¡ outras etapas: cancelamento, carta de correÃ§Ã£o, inutilizaÃ§Ã£o, etc. envolve apenas uma etapa:
 
-1. Entrega o XML e já obtém o protocolo (ou erro)
+1. Entrega o XML e jÃ¡ obtÃ©m o protocolo (ou erro)
 
 # E a Sefazclass:
 
 Tem eventos que tratam cada etapa.
 
-- Autorização de NFE, CTE, MDFE: NfeLoteEnvia(), CteLoteEnvia(), MDFeLoteEnvia()
+- AutorizaÃ§Ã£o de NFE, CTE, MDFE: NfeLoteEnvia(), CteLoteEnvia(), MDFeLoteEnvia()
 - Cancelamento:  NfeEventoCancela(), CteEventoCancela(), MDFeEventoCancela()
-- Carta de correção: NfeEventoCarta(), CteEventoCarta()
-- Inutilização: NfeInutiliza(), CteInutiliza()
+- Carta de correÃ§Ã£o: NfeEventoCarta(), CteEventoCarta()
+- InutilizaÃ§Ã£o: NfeInutiliza(), CteInutiliza()
 - Outros eventos: CteEventoDesacordo(), MdfeEventoEncerramento(), MdfeEventoInclusaoCondutor(), NfeEventoManifestacao()
 
-Verifique o nome dos parâmetros e saberá o que informar.
-Dúvidas, consulte o manual da SEFAZ, que contém todos os detalhes.
+Verifique o nome dos parÃ¢metros e saberÃ¡ o que informar.
+DÃºvidas, consulte o manual da SEFAZ, que contÃ©m todos os detalhes.
 
-# Considerações:
+# ConsideraÃ§Ãµes:
 
-- A Sefazclass não trata arquivos XMLs, e sim o conteúdo. cXML representa o conteúdo do XML
-- cCertificado é o nome do certificado, veja em propriedades do certificado o CN=
+- A Sefazclass nÃ£o trata arquivos XMLs, e sim o conteÃºdo. cXML representa o conteÃºdo do XML
+- cCertificado Ã© o nome do certificado, veja em propriedades do certificado o CN=
 
-A Sefazclass não inventa nada, tudo está dentro dos manuais do governo.
+A Sefazclass nÃ£o inventa nada, tudo estÃ¡ dentro dos manuais do governo.
 
-Para entregar os XMLs, cada UF ou serviço é para um endereço de internet diferente.
-Nos fontes da Sefazclass já tem muitos desses endereços, mas não significa que tem todos, ou que estão atualizados.
-Cabe ao usuário da classe fazer os testes finais e informar algum endereço errado ou inexistente.
+Para entregar os XMLs, cada UF ou serviÃ§o Ã© para um endereÃ§o de internet diferente.
+Nos fontes da Sefazclass jÃ¡ tem muitos desses endereÃ§os, mas nÃ£o significa que tem todos, ou que estÃ£o atualizados.
+Cabe ao usuÃ¡rio da classe fazer os testes finais e informar algum endereÃ§o errado ou inexistente.
 
 # Atualizada ate:
 
@@ -346,3 +346,14 @@ notepad sefaz.ini
 cd tests
 demo_teste_rapido.exe ..\sefaz.ini
 ```
+
+<div align="center">
+
+<b>Marcelo A. L. Carli</b><br>
+Malc InformÃ¡tica â€” GestÃ£o em SaÃºde Ocupacional<br>
+ğŸ“ MarÃ­lia/SP â€” Capital Nacional do Alimento Â®<br>
+ğŸŒ <a href="https://malc-informatica.ueniweb.com" target="_blank">malc-informatica.ueniweb.com</a><br>
+ğŸ“§ <a href="mailto:marceloalcarli@gmail.com">marceloalcarli@gmail.com</a><br>
+ğŸ“± Instagram: <a href="https://instagram.com/malcarli25" target="_blank">@malcarli25</a>
+
+</div>
