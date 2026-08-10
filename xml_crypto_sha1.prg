@@ -35,8 +35,8 @@ FUNCTION XmlSha1AssinarNFe( cXml, cSubject, cThumbprint )
       RETURN ""
    ENDIF
 
-   cDigest := hb_Base64Encode( XmlSha1HexToBin( hb_SHA1( cInfNFe ) ) )
-   cSignedInfo := XmlSha1SignedInfoCanon( "#" + cId, cDigest )
+   cDigest := hb_Base64Encode( XmlSha1HexToBin( hb_SHA1( XmlSha1C14N( cInfNFe, "http://www.portalfiscal.inf.br/nfe" ) ) ) )
+   cSignedInfo := XmlSha1C14N( XmlSha1SignedInfoRaw( "#" + cId, cDigest ), "http://www.w3.org/2000/09/xmldsig#" )
    cSigBin := FiscalSignSha1Hash( XmlSha1HexToBin( hb_SHA1( cSignedInfo ) ), cSubject, cThumbprint )
    IF Empty( cSigBin )
       RETURN ""
@@ -58,7 +58,110 @@ FUNCTION XmlSha1AssinarNFe( cXml, cSubject, cThumbprint )
 
 RETURN Left( cOut, nNFeEnd - 1 ) + cSignature + SubStr( cOut, nNFeEnd )
 
-FUNCTION XmlSha1SignedInfoCanon( cReferenceUri, cDigest )
+FUNCTION XmlSha1SignedInfoRaw( cReferenceUri, cDigest )
+   // sem xmlns no elemento raiz de proposito - XmlSha1C14N adiciona o xmlns
+   // canonico, exatamente como e feito para o infNFe, garantindo que o hash
+   // assinado seja idempotente ao que sera de fato gravado no documento.
+   LOCAL cXml
+   cXml := '<SignedInfo>'
+   cXml += '<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></CanonicalizationMethod>'
+   cXml += '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"></SignatureMethod>'
+   cXml += '<Reference URI="' + cReferenceUri + '">'
+   cXml += '<Transforms>'
+   cXml += '<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"></Transform>'
+   cXml += '<Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></Transform>'
+   cXml += '</Transforms>'
+   cXml += '<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></DigestMethod>'
+   cXml += '<DigestValue>' + cDigest + '</DigestValue>'
+   cXml += '</Reference>'
+   cXml += '</SignedInfo>'
+RETURN cXml
+
+FUNCTION XmlSha1C14N( cXml, cRootNs )
+   LOCAL cOut := "", nI := 1, nLen := Len( cXml )
+   LOCAL lFirstTag := .T.
+   LOCAL nTagStart, cTagName, cAttrsRaw, aAttrs, cAttrXml, nJ
+
+   DO WHILE nI <= nLen
+      IF SubStr( cXml, nI, 1 ) == "<"
+         IF SubStr( cXml, nI + 1, 1 ) == "/"
+            nTagStart := nI
+            DO WHILE nI <= nLen .AND. SubStr( cXml, nI, 1 ) != ">"
+               nI++
+            ENDDO
+            cOut += SubStr( cXml, nTagStart, nI - nTagStart + 1 )
+            nI++
+         ELSE
+            nI++  // pula '<'
+            nTagStart := nI
+            DO WHILE nI <= nLen .AND. ! ( SubStr( cXml, nI, 1 ) $ " " + Chr(9) + "/>" )
+               nI++
+            ENDDO
+            cTagName := SubStr( cXml, nTagStart, nI - nTagStart )
+
+            // captura o resto cru da tag (atributos + eventual '/') ate '>'
+            nTagStart := nI
+            DO WHILE nI <= nLen .AND. SubStr( cXml, nI, 1 ) != ">"
+               nI++
+            ENDDO
+            cAttrsRaw := SubStr( cXml, nTagStart, nI - nTagStart )
+            nI++  // pula '>'
+
+            aAttrs := XmlSha1ParseAttrs( cAttrsRaw )
+            ASort( aAttrs,,, {| a, b | a[ 1 ] < b[ 1 ] } )
+
+            cOut += "<" + cTagName
+            IF lFirstTag
+               cOut += ' xmlns="' + cRootNs + '"'
+               lFirstTag := .F.
+            ENDIF
+            FOR nJ := 1 TO Len( aAttrs )
+               cOut += " " + aAttrs[ nJ, 1 ] + '="' + aAttrs[ nJ, 2 ] + '"'
+            NEXT
+            cOut += ">"
+         ENDIF
+      ELSE
+         cOut += SubStr( cXml, nI, 1 )
+         nI++
+      ENDIF
+   ENDDO
+RETURN cOut
+
+STATIC FUNCTION XmlSha1ParseAttrs( cRaw )
+   LOCAL aAttrs := {}, nI := 1, nLen := Len( cRaw )
+   LOCAL nNameStart, nNameEnd, cName, cQuote, nValStart, cValue
+
+   DO WHILE nI <= nLen
+      DO WHILE nI <= nLen .AND. SubStr( cRaw, nI, 1 ) $ " " + Chr(9) + "/"
+         nI++
+      ENDDO
+      IF nI > nLen
+         EXIT
+      ENDIF
+      nNameStart := nI
+      DO WHILE nI <= nLen .AND. SubStr( cRaw, nI, 1 ) != "="
+         nI++
+      ENDDO
+      IF nI > nLen
+         EXIT
+      ENDIF
+      cName := AllTrim( SubStr( cRaw, nNameStart, nI - nNameStart ) )
+      nI++  // pula '='
+      cQuote := SubStr( cRaw, nI, 1 )
+      nI++  // pula aspa abertura
+      nValStart := nI
+      DO WHILE nI <= nLen .AND. SubStr( cRaw, nI, 1 ) != cQuote
+         nI++
+      ENDDO
+      cValue := SubStr( cRaw, nValStart, nI - nValStart )
+      nI++  // pula aspa fechamento
+      IF ! Empty( cName )
+         AAdd( aAttrs, { cName, cValue } )
+      ENDIF
+   ENDDO
+RETURN aAttrs
+
+FUNCTION XmlSha1SignedInfoEmbed( cReferenceUri, cDigest )
    LOCAL cXml
    cXml := '<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">'
    cXml += '<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></CanonicalizationMethod>'
@@ -75,20 +178,7 @@ FUNCTION XmlSha1SignedInfoCanon( cReferenceUri, cDigest )
 RETURN cXml
 
 FUNCTION XmlSha1SignedInfoNode( cReferenceUri, cDigest )
-   LOCAL cXml
-   cXml := '<SignedInfo>'
-   cXml += '<CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>'
-   cXml += '<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>'
-   cXml += '<Reference URI="' + cReferenceUri + '">'
-   cXml += '<Transforms>'
-   cXml += '<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>'
-   cXml += '<Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>'
-   cXml += '</Transforms>'
-   cXml += '<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>'
-   cXml += '<DigestValue>' + cDigest + '</DigestValue>'
-   cXml += '</Reference>'
-   cXml += '</SignedInfo>'
-RETURN cXml
+RETURN XmlSha1SignedInfoEmbed( cReferenceUri, cDigest )
 
 FUNCTION XmlSha1SignatureNode( cReferenceUri, cDigest, cSignature, cCert )
 RETURN '<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">' + XmlSha1SignedInfoNode( cReferenceUri, cDigest ) + '<SignatureValue>' + cSignature + '</SignatureValue><KeyInfo><X509Data><X509Certificate>' + cCert + '</X509Certificate></X509Data></KeyInfo></Signature>'
